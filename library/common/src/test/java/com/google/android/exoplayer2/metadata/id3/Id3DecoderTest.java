@@ -223,6 +223,27 @@ public final class Id3DecoderTest {
   }
 
   @Test
+  public void decodeApicFrameWithPngAndUtf16() {
+    byte[] rawId3 =
+        buildSingleFrameTag(
+            "APIC",
+            new byte[] {
+                1, 105, 109, 97, 103, 101, 47, 112, 110, 103, 0, 16, 0, 72, 0, 101, 0, 108, 0, 108,
+                0, 111, 0, 32, 0, 87, 0, 111, 0, 114, 0, 108, 0, 100, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8,
+                9, 0
+            });
+    Id3Decoder decoder = new Id3Decoder();
+    Metadata metadata = decoder.decode(rawId3, rawId3.length);
+    assertThat(metadata.length()).isEqualTo(1);
+    ApicFrame apicFrame = (ApicFrame) metadata.get(0);
+    assertThat(apicFrame.mimeType).isEqualTo("image/png");
+    assertThat(apicFrame.pictureType).isEqualTo(16);
+    assertThat(apicFrame.description).isEqualTo("Hello World");
+    assertThat(apicFrame.pictureData).hasLength(10);
+    assertThat(apicFrame.pictureData).isEqualTo(new byte[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 0});
+  }
+
+  @Test
   public void decodeCommentFrame() {
     byte[] rawId3 =
         buildSingleFrameTag(
